@@ -4,7 +4,7 @@ var MAP = {
     rows: 6,
     blockWidth: 101,
     blockHeight: 83, // The size of a visible block is 83, the character also should move in the y axis by 83px.
-    numberOfEnemies: 1
+    numberOfEnemies: 3
 };
 // This is the default Y position for the player, it scales automatically according to map size. Default for X is 0.
 MAP.spriteBeginningYPos = (MAP.rows * MAP.blockHeight) - 80 - Math.floor(MAP.blockHeight / 2);
@@ -19,7 +19,7 @@ var Enemy = function (row_num) {
     // a helper we've provided to easily load images
     this.sprite = 'images/enemy-bug.png';
     this.pos = {x: -MAP.blockWidth, y: MAP.spriteBeginningYPos - (row_num * MAP.blockHeight) };
-    this.speed = Math.random() * (100 - 30) + 30; // The speed of the enemy. Value is between 20 & 100
+    this.speed = Math.random() * (100 - 30) + 30; // The speed of the enemy. Value is between 30 & 100
 };
 // Update the enemy's position, required method for game
 // Parameter: dt, a time delta between ticks
@@ -88,8 +88,12 @@ Player.prototype.handleInput = function (keypress) {
 
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
-
-var allEnemies = [new Enemy(2), new Enemy(3), new Enemy(4), new Enemy(3)];
+var allEnemies = [];
+var i;
+for (i = 0; i < MAP.numberOfEnemies; i++) {
+    var row_num = Math.round(Math.random() * (4 - 2) + 2);
+    allEnemies.push(new Enemy(row_num));
+}
 // Place the player object in a variable called player
 var player = new Player();
 
