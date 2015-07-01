@@ -25,8 +25,8 @@ var Engine = (function(global) {
         ctx = canvas.getContext('2d'),
         lastTime;
 
-    canvas.width = MAP.blockWidth * MAP.columns;
-    canvas.height = (MAP.blockHeight * MAP.rows) + 108;
+    canvas.width = Map.blockWidth * Map.columns;
+    canvas.height = (Map.blockHeight * Map.rows) + 108;
     doc.body.appendChild(canvas);
 
     /* This function serves as the kickoff point for the game loop itself
@@ -45,7 +45,7 @@ var Engine = (function(global) {
         /* Call our update/render functions, pass along the time delta to
          * our update function since it may be used for smooth animation.
          */
-        if (MAP.gameRunning) { update(dt); }
+        if (Map.gameRunning) { update(dt); }
         render();
 
         /* Set our lastTime variable which is used to determine the time delta
@@ -79,7 +79,7 @@ var Engine = (function(global) {
      * on the entities themselves within your app.js file).
      */
     function update(dt) {
-        checkandResizeCanvas();
+        syncMap();
         updateEntities(dt);
         checkCollisions();
     }
@@ -98,6 +98,7 @@ var Engine = (function(global) {
         //player.update();
     }
 
+    /* Check for player & enemy collisions */
     function checkCollisions() {
 
         allEnemies.forEach(function(enemy) {
@@ -110,11 +111,12 @@ var Engine = (function(global) {
             var distance = Math.sqrt(dx * dx + dy * dy);
 
             if (distance < player_circle.radius + enemy_circle.radius) {
-                MAP.collided = true;
+                Map.collided = true;
             }
         });
-        if (!MAP.collided && player.pos.y <= MAP.spriteBeginningYPos - MAP.blockHeight * (MAP.rows -1)) {
-            MAP.score += 1;
+        // Update score if you jump into the water.
+        if (!Map.collided && player.pos.y <= Map.spriteBeginningYPos - Map.blockHeight * (Map.rows -1)) {
+            Map.score += 1;
             reset();
         }
     }
@@ -137,11 +139,11 @@ var Engine = (function(global) {
                 'images/grass-block.png',   // Row 1 of 2 of grass
                 'images/grass-block.png'    // Row 2 of 2 of grass
             ],
-            numRows = MAP.rows,
-            numCols = MAP.columns,
+            numRows = Map.rows,
+            numCols = Map.columns,
             row, col;
         // Clear top part of the canvas to avoid getting the characters head stuck in the top edge as there is no redraw.
-        ctx.clearRect(0, 0, ctx.canvas.width, MAP.blockHeight);
+        ctx.clearRect(0, 0, ctx.canvas.width, Map.blockHeight);
         /* Loop through the number of rows and columns we've defined above
          * and, using the rowImages array, draw the correct image for that
          * portion of the "grid"
@@ -155,12 +157,11 @@ var Engine = (function(global) {
                  * so that we get the benefits of caching these images, since
                  * we're using them over and over.
                  */
-                ctx.drawImage(Resources.get(rowImages[row]), col * MAP.blockWidth, row * MAP.blockHeight);
+                ctx.drawImage(Resources.get(rowImages[row]), col * Map.blockWidth, row * Map.blockHeight);
             }
         }
 
-
-        renderEntities(MAP.debug);
+        renderEntities(Map.debug);
         renderStatus();
     }
 
@@ -178,16 +179,16 @@ var Engine = (function(global) {
 
         player.render(debug);
     }
-
+    /* Render the overlay text for the map to show score & game over. */
     function renderStatus() {
-        if (MAP.collided === true) {
-            ctx.font = '30pt Calibri';
+        if (Map.collided === true) {
+            ctx.font = '25pt Calibri';
             ctx.textAlign = 'center';
-            ctx.fillStyle = 'white';
+            ctx.fillStyle = 'black';
             ctx.fillText(
-                'YOU GOT DIRTIED!! Score: ' + MAP.score,
-                parseInt(MAP.blockWidth * MAP.columns / 2),
-                parseInt(MAP.blockHeight * MAP.rows * 2 / 3)
+                'YOU GOT STINKED!! Score: ' + Map.score,
+                parseInt(Map.blockWidth * Map.columns / 2),
+                parseInt(Map.blockHeight * Map.rows * 2 / 3)
             );
         }
         else {
@@ -195,9 +196,9 @@ var Engine = (function(global) {
             ctx.textAlign = 'right';
             ctx.fillStyle = 'white';
             ctx.fillText(
-                'Score: ' + MAP.score,
-                parseInt(MAP.blockWidth * MAP.columns - (MAP.blockWidth * 1/8)),
-                parseInt((MAP.blockHeight / 2) + 40)
+                'Score: ' + Map.score,
+                parseInt(Map.blockWidth * Map.columns - (Map.blockWidth * 1/8)),
+                parseInt((Map.blockHeight / 2) + 40)
             );
         }
     }
@@ -210,13 +211,21 @@ var Engine = (function(global) {
         initializeCharacters();
     }
 
-    // Function to dynamically resize the map if the size defined in the MAP variable is changed.
-    function checkandResizeCanvas() {
+    // Function to dynamically update number of enemies or map size based on the Map variable.
+    function syncMap() {
+        // Change map size.
         var canvas = ctx.canvas;
-        var c_width = MAP.blockWidth * MAP.columns;
-        var c_height = (MAP.blockHeight * MAP.rows) + 108;
+        var c_height = (Map.blockHeight * Map.rows) + 108;
+        var c_width = Map.blockWidth * Map.columns;
+        //if (canvas.height != c_height) { canvas.height = c_height; }
         if (canvas.width != c_width) { canvas.width = c_width; }
-        if (canvas.height != c_height) { canvas.height = c_height; }
+
+        // Change the number of enemies.
+        if (allEnemies.length > Map.numberOfEnemies) { allEnemies.pop(); }
+        else if (allEnemies.length < Map.numberOfEnemies) {
+            row_num = randRange(2, 4);
+            allEnemies.push(new Enemy(row_num));
+        }
     }
 
     /* Go ahead and load all of the images we know we're going to need to
