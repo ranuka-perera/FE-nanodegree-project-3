@@ -45,7 +45,7 @@ var Engine = (function(global) {
         /* Call our update/render functions, pass along the time delta to
          * our update function since it may be used for smooth animation.
          */
-        update(dt);
+        if (MAP.gameRunning) { update(dt); }
         render();
 
         /* Set our lastTime variable which is used to determine the time delta
@@ -79,8 +79,9 @@ var Engine = (function(global) {
      * on the entities themselves within your app.js file).
      */
     function update(dt) {
+        checkandResizeCanvas();
         updateEntities(dt);
-        // checkCollisions();
+        checkCollisions();
     }
 
     /* This is called by the update function  and loops through all of the
@@ -95,6 +96,27 @@ var Engine = (function(global) {
             enemy.update(dt);
         });
         //player.update();
+    }
+
+    function checkCollisions() {
+
+        allEnemies.forEach(function(enemy) {
+            // From https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
+            var player_circle = {radius: enemy.radius, pos: enemy.getCenter()};
+            var enemy_circle = {radius: player.radius, pos: player.getCenter()};
+
+            var dx = player_circle.pos.x - enemy_circle.pos.x;
+            var dy = player_circle.pos.y - enemy_circle.pos.y;
+            var distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < player_circle.radius + enemy_circle.radius) {
+                MAP.collided = true;
+            }
+        });
+        if (!MAP.collided && player.pos.y <= MAP.spriteBeginningYPos - MAP.blockHeight * (MAP.rows -1)) {
+            MAP.score += 1;
+            reset();
+        }
     }
 
     /* This function initially draws the "game level", it will then call
@@ -138,22 +160,46 @@ var Engine = (function(global) {
         }
 
 
-        renderEntities();
+        renderEntities(MAP.debug);
+        renderStatus();
     }
 
     /* This function is called by the render function and is called on each game
      * tick. It's purpose is to then call the render functions you have defined
      * on your enemy and player entities within app.js
      */
-    function renderEntities() {
+    function renderEntities(debug) {
         /* Loop through all of the objects within the allEnemies array and call
          * the render function you have defined.
          */
         allEnemies.forEach(function(enemy) {
-            enemy.render();
+            enemy.render(debug);
         });
 
-        player.render();
+        player.render(debug);
+    }
+
+    function renderStatus() {
+        if (MAP.collided === true) {
+            ctx.font = '30pt Calibri';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = 'white';
+            ctx.fillText(
+                'YOU GOT DIRTIED!! Score: ' + MAP.score,
+                parseInt(MAP.blockWidth * MAP.columns / 2),
+                parseInt(MAP.blockHeight * MAP.rows * 2 / 3)
+            );
+        }
+        else {
+            ctx.font = '15pt Calibri';
+            ctx.textAlign = 'right';
+            ctx.fillStyle = 'white';
+            ctx.fillText(
+                'Score: ' + MAP.score,
+                parseInt(MAP.blockWidth * MAP.columns - (MAP.blockWidth * 1/8)),
+                parseInt((MAP.blockHeight / 2) + 40)
+            );
+        }
     }
 
     /* This function does nothing but it could have been a good place to
@@ -161,7 +207,16 @@ var Engine = (function(global) {
      * those sorts of things. It's only called once by the init() method.
      */
     function reset() {
-        // noop
+        initializeCharacters();
+    }
+
+    // Function to dynamically resize the map if the size defined in the MAP variable is changed.
+    function checkandResizeCanvas() {
+        var canvas = ctx.canvas;
+        var c_width = MAP.blockWidth * MAP.columns;
+        var c_height = (MAP.blockHeight * MAP.rows) + 108;
+        if (canvas.width != c_width) { canvas.width = c_width; }
+        if (canvas.height != c_height) { canvas.height = c_height; }
     }
 
     /* Go ahead and load all of the images we know we're going to need to
