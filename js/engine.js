@@ -25,8 +25,8 @@ var Engine = (function(global) {
         ctx = canvas.getContext('2d'),
         lastTime;
 
-    canvas.width = MAP.blockWidth * MAP.columns;
-    canvas.height = (MAP.blockHeight * MAP.rows) + 108;
+    canvas.width = Map.blockWidth * Map.columns;
+    canvas.height = (Map.blockHeight * Map.rows) + 108;
     doc.body.appendChild(canvas);
 
     /* This function serves as the kickoff point for the game loop itself
@@ -45,7 +45,7 @@ var Engine = (function(global) {
         /* Call our update/render functions, pass along the time delta to
          * our update function since it may be used for smooth animation.
          */
-        update(dt);
+        if (Map.gameRunning) { update(dt); }
         render();
 
         /* Set our lastTime variable which is used to determine the time delta
@@ -79,8 +79,9 @@ var Engine = (function(global) {
      * on the entities themselves within your app.js file).
      */
     function update(dt) {
+        syncMap();
         updateEntities(dt);
-        // checkCollisions();
+        checkCollisions();
     }
 
     /* This is called by the update function  and loops through all of the
@@ -94,7 +95,30 @@ var Engine = (function(global) {
         allEnemies.forEach(function(enemy) {
             enemy.update(dt);
         });
-        player.update();
+        //player.update();
+    }
+
+    /* Check for player & enemy collisions */
+    function checkCollisions() {
+
+        allEnemies.forEach(function(enemy) {
+            // From https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
+            var player_circle = {radius: enemy.radius, pos: enemy.getCenter()};
+            var enemy_circle = {radius: player.radius, pos: player.getCenter()};
+
+            var dx = player_circle.pos.x - enemy_circle.pos.x;
+            var dy = player_circle.pos.y - enemy_circle.pos.y;
+            var distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < player_circle.radius + enemy_circle.radius) {
+                Map.collided = true;
+            }
+        });
+        // Update score if you jump into the water.
+        if (!Map.collided && player.pos.y <= Map.spriteBeginningYPos - Map.blockHeight * (Map.rows -1)) {
+            Map.score += 1;
+            reset();
+        }
     }
 
     /* This function initially draws the "game level", it will then call
@@ -115,11 +139,11 @@ var Engine = (function(global) {
                 'images/grass-block.png',   // Row 1 of 2 of grass
                 'images/grass-block.png'    // Row 2 of 2 of grass
             ],
-            numRows = MAP.rows,
-            numCols = MAP.columns,
+            numRows = Map.rows,
+            numCols = Map.columns,
             row, col;
         // Clear top part of the canvas to avoid getting the characters head stuck in the top edge as there is no redraw.
-        ctx.clearRect(0, 0, ctx.canvas.width, MAP.blockHeight);
+        ctx.clearRect(0, 0, ctx.canvas.width, Map.blockHeight);
         /* Loop through the number of rows and columns we've defined above
          * and, using the rowImages array, draw the correct image for that
          * portion of the "grid"
@@ -133,27 +157,50 @@ var Engine = (function(global) {
                  * so that we get the benefits of caching these images, since
                  * we're using them over and over.
                  */
-                ctx.drawImage(Resources.get(rowImages[row]), col * MAP.blockWidth, row * MAP.blockHeight);
+                ctx.drawImage(Resources.get(rowImages[row]), col * Map.blockWidth, row * Map.blockHeight);
             }
         }
 
-
-        renderEntities();
+        renderEntities(Map.debug);
+        renderStatus();
     }
 
     /* This function is called by the render function and is called on each game
      * tick. It's purpose is to then call the render functions you have defined
      * on your enemy and player entities within app.js
      */
-    function renderEntities() {
+    function renderEntities(debug) {
         /* Loop through all of the objects within the allEnemies array and call
          * the render function you have defined.
          */
         allEnemies.forEach(function(enemy) {
-            enemy.render();
+            enemy.render(debug);
         });
 
-        player.render();
+        player.render(debug);
+    }
+    /* Render the overlay text for the map to show score & game over. */
+    function renderStatus() {
+        if (Map.collided === true) {
+            ctx.font = '25pt Calibri';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = 'black';
+            ctx.fillText(
+                'YOU GOT STINKED!! Score: ' + Map.score,
+                parseInt(Map.blockWidth * Map.columns / 2),
+                parseInt(Map.blockHeight * Map.rows * 2 / 3)
+            );
+        }
+        else {
+            ctx.font = '15pt Calibri';
+            ctx.textAlign = 'right';
+            ctx.fillStyle = 'white';
+            ctx.fillText(
+                'Score: ' + Map.score,
+                parseInt(Map.blockWidth * Map.columns - (Map.blockWidth * 1/8)),
+                parseInt((Map.blockHeight / 2) + 40)
+            );
+        }
     }
 
     /* This function does nothing but it could have been a good place to
@@ -161,7 +208,24 @@ var Engine = (function(global) {
      * those sorts of things. It's only called once by the init() method.
      */
     function reset() {
-        // noop
+        initializeCharacters();
+    }
+
+    // Function to dynamically update number of enemies or map size based on the Map variable.
+    function syncMap() {
+        // Change map size.
+        var canvas = ctx.canvas;
+        var c_height = (Map.blockHeight * Map.rows) + 108;
+        var c_width = Map.blockWidth * Map.columns;
+        //if (canvas.height != c_height) { canvas.height = c_height; }
+        if (canvas.width != c_width) { canvas.width = c_width; }
+
+        // Change the number of enemies.
+        if (allEnemies.length > Map.numberOfEnemies) { allEnemies.pop(); }
+        else if (allEnemies.length < Map.numberOfEnemies) {
+            row_num = randRange(2, 4);
+            allEnemies.push(new Enemy(row_num));
+        }
     }
 
     /* Go ahead and load all of the images we know we're going to need to

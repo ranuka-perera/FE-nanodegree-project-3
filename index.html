@@ -5,8 +5,23 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+    <p>Jump into the lake to get a bath instead of being stinked up by stinkbugs!</p>
     <script src="js/resources.js"></script>
     <script src="js/app.js"></script>
     <script src="js/engine.js"></script>
+    <p>
+        <button onclick="switchDebug();">Debug On / Off</button>
+        <button onclick="pauseApp();">TimeFreeze</button>
+        <button onclick="initializeCharacters(true);">Reset Map</button>
+    </p>
+    <p>
+        <button onclick="makeMapWider();">Make Map Larger</button>
+        <button onclick="makeMapThinner();">Make Map Smaller</button>
+        </p>
+    <p>
+        <label>Set custom enemies <input onchange="updateEnemy(this);" value="4"></label>
+        <button onclick="addEnemy();">Add Enemy</button>
+        <button onclick="removeEnemy();">Remove Enemy</button>
+    </p>
 </body>
 </html>
