@@ -1,6 +1,8 @@
-frontend-nanodegree-arcade-game
+Frogger-clone game
 ===============================
 
-Students should use this rubric: https://www.udacity.com/course/viewer#!/c-ud015/l-3072058665/m-3072588797
+You have to get a bath. Try to jump in the water as many times as possible without getting stinked up by the stink bugs.
 
-for self-checking their submission.
+Cheat your way through visualising collision circles, freezing enemies, enlarging the map, reducing enemies.
+
+You have to reset the map if you get stinked up!
