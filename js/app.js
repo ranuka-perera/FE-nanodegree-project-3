@@ -14,6 +14,7 @@ var Map = {
 // default position for X-axis is 0. The -80 is used to offset the blank area on the top of the map.
 Map.spriteBeginningYPos = (Map.rows * Map.blockHeight) - 80 - Math.floor(Map.blockHeight / 2);
 
+// Function to get a random number within a range.
 function randRange(min, max) {
     return Math.round(Math.random() * (max - min) + min);
 }
@@ -158,14 +159,13 @@ document.addEventListener('keyup', function(e) {
 function locationValid(val, type) {
     "use strict";
     var returnVal = false;
-    val = typeof val !== 'undefined' ? val : -1;
     type = typeof type !== 'undefined' ? type : 'x';
-    if (isNaN(val)) { return returnVal; }
     var minX = 0;
     // Max moveable area. 1 less than map size. Because we are only moving In the middles of the tiles, not the edges.
     var maxX = (Map.columns - 1) * Map.blockWidth;
     var minY = -50;
     var maxY = Map.spriteBeginningYPos;
+    // If area to be moved is within map, return true.
     if (type === 'x') {
         if (val <= maxX && val >= minX) { returnVal = true; }
     }
@@ -174,19 +174,18 @@ function locationValid(val, type) {
 }
 // Draw the debug circles that shows the range used for collision detection.
 function drawDebugCircles(center_position, radius, player) {
-        var alpha = ctx.globalAlpha;
-        var color;
-        ctx.beginPath();
-        ctx.arc(center_position.x, center_position.y, radius, 0, 2 * Math.PI, false);
-        ctx.globalAlpha = 0.5;
-        if (player === true) {  color = 'blue'; }
-        else { color = 'red'; }
-        ctx.fillStyle = color;
-        ctx.fill();
-        ctx.lineWidth = 1;
-        ctx.strokeStyle = color;
-        ctx.stroke();
-        ctx.globalAlpha = alpha;
+    var alpha = ctx.globalAlpha;
+    var color;
+    ctx.beginPath();
+    ctx.arc(center_position.x, center_position.y, radius, 0, 2 * Math.PI, false);
+    ctx.globalAlpha = 0.5;
+    color = player ? 'blue': 'red';
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = color;
+    ctx.stroke();
+    ctx.globalAlpha = alpha;
 }
 
 // Switch debug more on or off.
