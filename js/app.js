@@ -50,7 +50,7 @@ var Enemy = function (row_num) {
     var random_x = randRange(-Map.BLOCKWIDTH, Map.columns * Map.BLOCKWIDTH);
     // Set the starting Y in the correct row specified when creating the enemy object.
     this.pos = {x: random_x, y: Map.SPRITE_BEGINNING_Y_POS - (row_num * Map.BLOCKHEIGHT) };
-    this.speed = randRange(30, 100); // The speed of the enemy. Value is between 30 & 100
+    this.speed = randRange(5, 10); // The speed of the enemy. Value is between 30 & 100
     // The radius to calculate the circular area occupied by the enemy. Used for collision detection.
     this.radius = (Map.BLOCKWIDTH - 2) / 2;
 };
@@ -66,7 +66,7 @@ Enemy.prototype.update = function (dt) {
     // -101 < bug_x_position < width*101
     var min_pos = -Map.BLOCKWIDTH;
     var max_pos = Map.columns * Map.BLOCKWIDTH;
-    var new_pos = this.pos.x + (this.speed * dt);
+    var new_pos = this.pos.x + (this.speed * 10 * dt);
     // Make the x position fit the visible range no matter how big the dt variable is.
     // Also note that the enemy can't travel backwards.
     while (new_pos > max_pos) {
