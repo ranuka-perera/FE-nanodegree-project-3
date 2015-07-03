@@ -25,8 +25,8 @@ var Engine = (function(global) {
         ctx = canvas.getContext('2d'),
         lastTime;
 
-    canvas.width = Map.blockWidth * Map.columns;
-    canvas.height = (Map.blockHeight * Map.rows) + 108;
+    canvas.width = Map.BLOCKWIDTH * Map.columns;
+    canvas.height = (Map.BLOCKHEIGHT * Map.rows) + 108;
     doc.body.appendChild(canvas);
 
     /* This function serves as the kickoff point for the game loop itself
@@ -115,7 +115,7 @@ var Engine = (function(global) {
             }
         });
         // Update score if you jump into the water.
-        if (!Map.collided && player.pos.y <= Map.spriteBeginningYPos - Map.blockHeight * (Map.rows -1)) {
+        if (!Map.collided && player.pos.y <= Map.SPRITE_BEGINNING_Y_POS - Map.BLOCKHEIGHT * (Map.rows -1)) {
             Map.score += 1;
             reset();
         }
@@ -143,7 +143,7 @@ var Engine = (function(global) {
             numCols = Map.columns,
             row, col;
         // Clear top part of the canvas to avoid getting the characters head stuck in the top edge as there is no redraw.
-        ctx.clearRect(0, 0, ctx.canvas.width, Map.blockHeight);
+        ctx.clearRect(0, 0, ctx.canvas.width, Map.BLOCKHEIGHT);
         /* Loop through the number of rows and columns we've defined above
          * and, using the rowImages array, draw the correct image for that
          * portion of the "grid"
@@ -157,7 +157,7 @@ var Engine = (function(global) {
                  * so that we get the benefits of caching these images, since
                  * we're using them over and over.
                  */
-                ctx.drawImage(Resources.get(rowImages[row]), col * Map.blockWidth, row * Map.blockHeight);
+                ctx.drawImage(Resources.get(rowImages[row]), col * Map.BLOCKWIDTH, row * Map.BLOCKHEIGHT);
             }
         }
 
@@ -187,8 +187,8 @@ var Engine = (function(global) {
             ctx.fillStyle = 'black';
             ctx.fillText(
                 'YOU GOT STINKED!! Score: ' + Map.score,
-                parseInt(Map.blockWidth * Map.columns / 2),
-                parseInt(Map.blockHeight * Map.rows * 2 / 3)
+                parseInt(Map.BLOCKWIDTH * Map.columns / 2),
+                parseInt(Map.BLOCKHEIGHT * Map.rows * 2 / 3)
             );
         }
         else {
@@ -197,8 +197,8 @@ var Engine = (function(global) {
             ctx.fillStyle = 'white';
             ctx.fillText(
                 'Score: ' + Map.score,
-                parseInt(Map.blockWidth * Map.columns - (Map.blockWidth * 1/8)),
-                parseInt((Map.blockHeight / 2) + 40)
+                parseInt(Map.BLOCKWIDTH * Map.columns - (Map.BLOCKWIDTH * 1/8)),
+                parseInt((Map.BLOCKHEIGHT / 2) + 40)
             );
         }
     }
@@ -215,8 +215,8 @@ var Engine = (function(global) {
     function syncMap() {
         // Change map size.
         var canvas = ctx.canvas;
-        var c_height = (Map.blockHeight * Map.rows) + 108;
-        var c_width = Map.blockWidth * Map.columns;
+        var c_height = (Map.BLOCKHEIGHT * Map.rows) + 108;
+        var c_width = Map.BLOCKWIDTH * Map.columns;
         //if (canvas.height != c_height) { canvas.height = c_height; }
         if (canvas.width != c_width) { canvas.width = c_width; }
 
