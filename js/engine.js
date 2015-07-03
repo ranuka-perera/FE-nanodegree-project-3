@@ -179,7 +179,9 @@ var Engine = (function(global) {
 
         player.render(debug);
     }
-    /* Render the overlay text for the map to show score & game over. */
+
+    /* Render the overlay text for the map to show score or game over.
+     */
     function renderStatus() {
         if (Map.collided === true) {
             ctx.font = '25pt Calibri';
@@ -211,7 +213,8 @@ var Engine = (function(global) {
         initializeCharacters();
     }
 
-    // Function to dynamically update number of enemies or map size based on the Map variable.
+    /* Function to dynamically update number of enemies or map size based on the Map variable.
+     */
     function syncMap() {
         // Change map size.
         var canvas = ctx.canvas;
