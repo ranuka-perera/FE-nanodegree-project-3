@@ -112,6 +112,7 @@ var Engine = (function(global) {
 
             if (distance < player_circle.radius + enemy_circle.radius) {
                 Map.collided = true;
+                Map.gameRunning = false;
             }
         });
         // Update score if you jump into the water.
@@ -240,8 +241,8 @@ var Engine = (function(global) {
         'images/water-block.png',
         'images/grass-block.png',
         'images/enemy-bug.png',
-        'images/char-boy.png',
-        'images/char-princess-girl.png'
+        'images/char-princess-girl.png',
+        'images/red-x_mark.png'
     ]);
     Resources.onReady(init);
 

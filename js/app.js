@@ -27,6 +27,11 @@ var LivingThing = function () {
 LivingThing.prototype.render = function (debug) {
     "use strict";
     ctx.drawImage(Resources.get(this.sprite), this.pos.x, this.pos.y);
+    // If the we are rendering the player, and the player collided with a enemy.
+    if (Map.collided && this.player) {
+        var center = this.getCenter();
+        ctx.drawImage(Resources.get('images/red-x_mark.png'), center.x - (Map.BLOCKWIDTH /2), center.y - (Map.BLOCKHEIGHT / 2));
+    }
     if (debug === true) {
         drawDebugCircles(this.getCenter(), this.radius, this.player);
     }
@@ -82,7 +87,7 @@ var Player = function () {
     this.pos = {x: 0, y: Map.SPRITE_BEGINNING_Y_POS};
     this.sprite = 'images/char-princess-girl.png';
     this.radius = 30;
-    this.player = true; // Variable used to make debug circle colour different from enemies.
+    this.player = true; // Variable used to make debug circle colour different from enemies & to display the X mark.
 };
 // Player update function not needed.
 //Player.prototype.update = function (dt) {
@@ -104,17 +109,19 @@ Player.prototype.moveRight = function (pixels) {
 // Send the keystrokes to the player movement function.
 Player.prototype.handleInput = function (keypress) {
     "use strict";
-    if (keypress === 'left') {
-        this.moveLeft(Map.BLOCKWIDTH);
-    }
-    else if (keypress === 'right') {
-        this.moveRight(Map.BLOCKWIDTH);
-    }
-    else if (keypress === 'up') {
-        this.moveUp(Map.BLOCKHEIGHT);
-    }
-    else if (keypress === 'down') {
-        this.moveDown(Map.BLOCKHEIGHT);
+    if (!Map.collided) {
+        if (keypress === 'left') {
+            this.moveLeft(Map.BLOCKWIDTH);
+        }
+        else if (keypress === 'right') {
+            this.moveRight(Map.BLOCKWIDTH);
+        }
+        else if (keypress === 'up') {
+            this.moveUp(Map.BLOCKHEIGHT);
+        }
+        else if (keypress === 'down') {
+            this.moveDown(Map.BLOCKHEIGHT);
+        }
     }
 };
 // Does the bounds checking for the player.
@@ -151,6 +158,7 @@ function initializeCharacters(resetMap) {
     player = new Player();
     if (resetMap === true) {
         Map.collided = false;
+        Map.gameRunning = true;
         Map.score = 0;
     }
 }
@@ -190,7 +198,9 @@ function switchDebug () {
 
 // Paue updating the enemies's update, movement and map updates.
 function pauseApp () {
-    Map.gameRunning = !Map.gameRunning;
+    if (!Map.collided) {
+        Map.gameRunning = !Map.gameRunning;
+    }
 }
 
 //Add extra column to map.
